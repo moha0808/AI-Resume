@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: ai-resume-server
+    env: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # You will provide this in the Render dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        sync: false # Set this to your Vercel URL
+      - key: AI_SERVICE_URL
+        fromService:
+          type: web
+          name: ai-resume-ai
+          envVarKey: RENDER_EXTERNAL_URL
+
+  - type: web
+    name: ai-resume-ai
+    env: python
+    rootDir: ai-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: USE_MOCK
+        value: "false"
+      - key: OPENAI_API_KEY
+        sync: false # You will provide this in the Render dashboard
